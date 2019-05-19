@@ -3,10 +3,12 @@ import argparse
 from solver import Solver
 from data_loader import get_loader, TestDataset
 from torch.backends import cudnn
+from utils import VCTK_PATH
 
 
 def str2bool(v):
-    return v.lower() in ('true')
+    return v.lower() == 'true'
+
 
 def main(config):
     # For fast training.
@@ -27,7 +29,7 @@ def main(config):
     # Solver for training and testing StarGAN.
     solver = Solver(train_loader, test_loader, config)
 
-    if config.mode == 'train':    
+    if config.mode == 'train':
         solver.train()
 
     # elif config.mode == 'test':
@@ -43,7 +45,7 @@ if __name__ == '__main__':
     parser.add_argument('--lambda_rec', type=float, default=10, help='weight for reconstruction loss')
     parser.add_argument('--lambda_gp', type=float, default=10, help='weight for gradient penalty')
     parser.add_argument('--sampling_rate', type=int, default=16000, help='sampling rate')
-    
+
     # Training configuration.
     parser.add_argument('--batch_size', type=int, default=32, help='mini-batch size')
     parser.add_argument('--num_iters', type=int, default=200000, help='number of total iterations for training D')
@@ -64,9 +66,9 @@ if __name__ == '__main__':
     parser.add_argument('--use_tensorboard', type=str2bool, default=True)
 
     # Directories.
-    parser.add_argument('--train_data_dir', type=str, default='./data/mc/train')
-    parser.add_argument('--test_data_dir', type=str, default='./data/mc/test')
-    parser.add_argument('--wav_dir', type=str, default="./data/VCTK-Corpus/wav16")
+    parser.add_argument('--train_data_dir', type=str, default=f'{VCTK_PATH}/mc/train')
+    parser.add_argument('--test_data_dir', type=str, default=f'{VCTK_PATH}/mc/test')
+    parser.add_argument('--wav_dir', type=str, default=f"{VCTK_PATH}/wav16")
     parser.add_argument('--log_dir', type=str, default='./logs')
     parser.add_argument('--model_save_dir', type=str, default='./models')
     parser.add_argument('--sample_dir', type=str, default='./samples')
