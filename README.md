@@ -4,7 +4,7 @@ Note that the model architecture is a little different from that of the original
 
 # Dependencies
 See requirements.txt.  
-* Python 3.6 (or 3.5)
+* Python 3.6
 * Pytorch 0.4.0
 * pyworld
 * tqdm
