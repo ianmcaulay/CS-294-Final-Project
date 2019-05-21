@@ -26,6 +26,8 @@ If the downloaded VCTK is in tar.gz, run this:
 tar -xzvf VCTK-Corpus.tar.gz -C ./data
 ```
 
+Set utils.VCTK_PATH to the location of the extracted VCTK directory (e.g. `"./data/VCTK-Corpus"`)
+
 Preprocess data
 
 We will use Mel-cepstral coefficients(MCEPs) here.
