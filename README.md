@@ -29,7 +29,7 @@ tar -xzvf VCTK-Corpus.tar.gz -C ./data
 
 Set utils.VCTK_PATH to the location of the extracted VCTK directory (e.g. `"./data/VCTK-Corpus"`)
 
-Preprocess data
+## Preprocess data
 
 We will use Mel-cepstral coefficients(MCEPs) here.
 
@@ -37,7 +37,7 @@ We will use Mel-cepstral coefficients(MCEPs) here.
 python preprocess.py
 ```
 
-Train model
+## Train model
 
 Note: you may need to early stop the training process if the training-time test samples sounds good or the you can also see the training loss curves to determine early stop or not.
 
@@ -45,9 +45,7 @@ Note: you may need to early stop the training process if the training-time test 
 python main.py
 ```
 
-Convert
+## Convert
 
 Set convert.MODEL_PATH to the location of the generator model (e.g. `"models/23000-G.ckpt"`). Run `python convert.py` or use `convert.convert(src_dir, trg_wav)` by passing in a directory to the source audio and a wav file of the target speaker. 
-
-
 
