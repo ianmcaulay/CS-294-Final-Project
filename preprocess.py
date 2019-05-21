@@ -3,13 +3,15 @@ import argparse
 from multiprocessing import cpu_count
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
-from utils import *
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 import glob
 from os.path import join, basename
 import subprocess
 from time import time
+
+import concat_audio
+from utils import *
 
 
 def resample(spk, origin_wavpath, target_wavpath):
@@ -100,8 +102,10 @@ if __name__ == '__main__':
                         help="The original wav path to resample.")
     parser.add_argument("--target_wavpath", type=str, default=target_wavpath_default,
                         help="The original wav path to resample.")
-    parser.add_argument("--mc_dir_train", type=str, default = mc_dir_train_default, help = "The directory to store the training features.")
-    parser.add_argument("--mc_dir_test", type=str, default = mc_dir_test_default, help = "The directory to store the testing features.")
+    parser.add_argument("--mc_dir_train", type=str, default = mc_dir_train_default,
+                        help="The directory to store the training features.")
+    parser.add_argument("--mc_dir_test", type=str, default = mc_dir_test_default,
+                        help="The directory to store the testing features.")
     parser.add_argument("--num_workers", type=int, default=None, help="The number of cpus to use.")
 
     argv = parser.parse_args()
@@ -134,16 +138,12 @@ if __name__ == '__main__':
     # print("processing {} speaker folders".format(len(spk_folders)))
     # print(spk_folders)
 
-    print('Getting results list')
-    futures = []
-    # for spk in speaker_used:
-    #     spk_path = os.path.join(work_dir, spk)
-    #     futures.append(executor.submit(partial(get_spk_world_feats, spk_path, mc_dir_train, mc_dir_test, sample_rate)))
-    # #result_list = [future.result() for future in tqdm(futures)]
-    # result_list = [future.result() for future in futures]
+    print('Getting results list...')
     result_list = []
     for spk in speaker_used:
         spk_path = os.path.join(work_dir, spk)
         result_list.append(get_spk_world_feats(spk_path, mc_dir_train, mc_dir_test, sample_rate))
-
     print(result_list)
+
+    print('Concatting audio for target speakers...')
+    concat_audio.run()

@@ -38,13 +38,11 @@ def create_mc(speakers):
 
 
 def run():
-    print(data_loader.speakers)
-    new_spk = ['p225', 'p226', 'p229', 'p232', 'p248', 'p251', 'p262', 'p272',
-               'p292', 'p293', 'p300', 'p360', 'p361']
-
-    # assert set(new_spk) & set(data_loader.speakers) == set()
-    concat_for_all_speakers(new_spk)
-    create_mc(new_spk)
+    speakers = ['p225', 'p226', 'p229', 'p232', 'p248', 'p251', 'p262', 'p272',
+                'p292', 'p293', 'p300', 'p360', 'p361']
+    assert set(speakers).issuperset(data_loader.speakers), 'All training speakers must have concatted audio.'
+    concat_for_all_speakers(speakers)
+    create_mc(speakers)
 
 
 if __name__ == '__main__':
