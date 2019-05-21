@@ -3,6 +3,7 @@ This is a pytorch implementation of the paper: StarGAN-VC: Non-parallel many-to-
 Note that the model architecture is a little different from that of the original paper.
 
 # Dependencies
+See requirements.txt.  
 * Python 3.6 (or 3.5)
 * Pytorch 0.4.0
 * pyworld
