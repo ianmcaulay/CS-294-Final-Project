@@ -1,15 +1,18 @@
-from model import Generator
 import torch
 import numpy as np
 import os
-from data_loader import to_categorical
 import librosa
 import utils
 import glob
 from pathlib import Path
-from os.path import join, basename
+from os.path import join, basename, splitext
+from tqdm import tqdm
 
-# Set MODEL_PATH here. e.g. MODEL_PATH = 'models/20190328_first_run/23000-G.ckpt'
+from model import Generator
+from data_loader import to_categorical
+from utils import VCTK_PATH
+
+# Set MODEL_PATH here. e.g. MODEL_PATH = 'models/modified_stargans/modified_23000-G.ckpt'
 MODEL_PATH = None
 
 # Below is the accent info for the used 10 speakers.
@@ -69,7 +72,7 @@ class TestDataset(object):
 def get_stats(wav_files):
     f0s = []
     coded_sps = []
-    for wav_file in wav_files:
+    for wav_file in tqdm(wav_files):
         f0, _, _, _, coded_sp = utils.world_encode_wav(wav_file, fs=utils.SAMPLING_RATE)
         f0s.append(f0)
         coded_sps.append(coded_sp)
@@ -84,13 +87,18 @@ def get_stats(wav_files):
 
 
 def convert(src_wav_dir, trg_wav_file):
-    src_wav_files = glob.glob(f'{src_wav_dir}/*.wav')
+    all_src_wav_files = glob.glob(f'{src_wav_dir}/*.wav')
+    # This regex for src_wav_files creates about 20 output files to get a good sample without taking too
+    # much time or memory. It can be altered (including setting to a single file or all_src_wav_files)
+    # to create fewer/more output files.
+    src_wav_files = glob.glob(f'{src_wav_dir}/p???_0[01][0-9].wav')
     src_wavs = [utils.load_wav(src_wav_file, utils.SAMPLING_RATE) for src_wav_file in src_wav_files]
     trg_wav = utils.load_wav(trg_wav_file, utils.SAMPLING_RATE)
-    converted_dir = src_dir.parent.joinpath('converted_audio')
+    trg_wav_name = splitext(basename(trg_wav_file))[0]
+    converted_dir = VCTK_PATH.joinpath('converted_audio', 'trg_' + trg_wav_name)
     os.makedirs(converted_dir, exist_ok=True)
 
-    src_stats = get_stats(src_wav_files)
+    src_stats = get_stats(all_src_wav_files)
     trg_stats = get_stats([trg_wav_file])
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -106,7 +114,7 @@ def convert(src_wav_dir, trg_wav_file):
     trg_embed = G.trg_downsample(trg_coded_sp_norm_tensor)
 
     with torch.no_grad():
-        for i, src_wav in enumerate(src_wavs):
+        for i, src_wav in enumerate(tqdm(src_wavs)):
             f0, _, sp, ap = utils.world_decompose(wav=src_wav, fs=utils.SAMPLING_RATE,
                                                   frame_period=utils.FRAME_PERIOD)
             coded_sp = utils.world_encode_spectral_envelop(sp=sp, fs=utils.SAMPLING_RATE, dim=utils.NUM_MCEP)
@@ -135,7 +143,7 @@ def convert(src_wav_dir, trg_wav_file):
                 fs=utils.SAMPLING_RATE,
                 frame_period=utils.FRAME_PERIOD)
 
-            output_path = converted_dir.joinpath(os.path.basename(src_wav_files[i]))
+            output_path = converted_dir.joinpath('src_' + os.path.basename(src_wav_files[i]))
             print(f'Saving to {output_path}')
             librosa.output.write_wav(output_path, wav_transformed, utils.SAMPLING_RATE)
             # wav_cpsyn = world_speech_synthesis(f0=f0, coded_sp=coded_sp,
@@ -147,36 +155,16 @@ def get_model(device):
     G = Generator().to(device)
     # test_loader = TestDataset(config)
     # Restore model
-    print(f'Loading the trained models from {MODEL_PATH}...')
+    print(f'Loading the trained model from {MODEL_PATH}...')
     G.load_state_dict(torch.load(MODEL_PATH, map_location=lambda storage, loc: storage))
     return G
 
 
 if __name__ == '__main__':
-    src_dir = Path('data/synth_audio/testing')
-    trg_wav = Path('data/concatted_audio/wav/p262/p262_concatted.wav')
+    # src_dir = VCTK_PATH.joinpath('wav16', 'p262')  # Src in training data
+    src_dir = VCTK_PATH.joinpath('wav16', 'p226')  # Src out of training data
+    # trg_wav = VCTK_PATH.joinpath('concatted_audio', 'wav', 'p272', 'p272_concatted.wav')  # Trg in training data
+    trg_wav = VCTK_PATH.joinpath('concatted_audio', 'wav', 'p226', 'p226_concatted.wav')  # Trg out of training data
+    assert src_dir.exists()
+    assert trg_wav.exists()
     convert(src_dir, trg_wav)
-#     parser = argparse.ArgumentParser()
-#
-#     # Model configuration.
-#     parser.add_argument('--num_speakers', type=int, default=10, help='dimension of speaker labels')
-#     parser.add_argument('--num_converted_wavs', type=int, default=8, help='number of wavs to convert.')
-#     parser.add_argument('--resume_iters', type=int, default=None, help='step to resume for testing.')
-#     parser.add_argument('--src_spk', type=str, default='p262', help='target speaker.')
-#     parser.add_argument('--trg_spk', type=str, default='p272', help='target speaker.')
-#
-#     # Directories.
-#     parser.add_argument('--train_data_dir', type=str, default='./data/mc/train')
-#     parser.add_argument('--test_data_dir', type=str, default='./data/mc/test')
-#     parser.add_argument('--wav_dir', type=str, default="./data/VCTK-Corpus/wav16")
-#     parser.add_argument('--log_dir', type=str, default='./logs')
-#     parser.add_argument('--model_save_dir', type=str, default='./models')
-#     parser.add_argument('--convert_dir', type=str, default='./converted')
-#
-#     config = parser.parse_args()
-#
-#     print(config)
-#     if config.resume_iters is None:
-#         raise RuntimeError("Please specify the step number for resuming.")
-#     test(config)
-

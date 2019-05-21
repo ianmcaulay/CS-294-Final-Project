@@ -37,7 +37,7 @@ def create_mc(speakers):
         get_spk_world_feats(spk_fold_path, mc_dir_train, mc_dir_test, sample_rate=16000)
 
 
-if __name__ == '__main__':
+def run():
     print(data_loader.speakers)
     new_spk = ['p225', 'p226', 'p229', 'p232', 'p248', 'p251', 'p262', 'p272',
                'p292', 'p293', 'p300', 'p360', 'p361']
@@ -45,3 +45,7 @@ if __name__ == '__main__':
     # assert set(new_spk) & set(data_loader.speakers) == set()
     concat_for_all_speakers(new_spk)
     create_mc(new_spk)
+
+
+if __name__ == '__main__':
+    run()
