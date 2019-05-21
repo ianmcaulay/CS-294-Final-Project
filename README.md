@@ -33,11 +33,7 @@ Preprocess data
 We will use Mel-cepstral coefficients(MCEPs) here.
 
 ```bash
-python preprocess.py --sample_rate 16000 \
-                    --origin_wavpath data/VCTK-Corpus/wav48 \
-                    --target_wavpath data/VCTK-Corpus/wav16 \
-                    --mc_dir_train data/mc/train \
-                    --mc_dir_test data/mc/test
+python preprocess.py
 ```
 
 Train model
@@ -50,14 +46,7 @@ python main.py
 
 Convert
 
-For example: restore model at step 200000 and specify the source speaker and target speaker to `p262` and `p272`, respectively.
-
-```
-convert.py --resume_iters 200000 --src_spk p262 --trg_spk p272
-```
-
-## To-Do list
-- [x] Post some converted samples (Please find some converted samples in the `converted_samples` folder).
+Set convert.MODEL_PATH to the location of the generator model (e.g. `"models/23000-G.ckpt"`). Run `python convert.py` or use `convert.convert(src_dir, trg_wav)` by passing in a directory to the source audio and a wav file of the target speaker. 
 
 
 
