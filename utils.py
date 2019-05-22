@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Set VCTK_PATH to whereever VCTK data was extracted to.
 VCTK_PATH = Path('../../data/VCTK-Corpus')
-assert VCTK_PATH.exists()
+assert VCTK_PATH.exists(), f'VCTK data not found at {VCTK_PATH}. Update utils.VCTK_PATH variable.'
 SAMPLING_RATE = 16000
 FRAME_PERIOD = 5
 NUM_MCEP = 36

@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 import glob
 from os.path import join, basename
 import subprocess
-from time import time
 
 import concat_audio
 from utils import *
@@ -56,9 +55,7 @@ def get_spk_world_feats(spk_fold_path, mc_dir_train, mc_dir_test, sample_rate=16
     f0s = []
     coded_sps = []
     for wav_file in train_paths:
-        t0 = time()
         f0, _, _, _, coded_sp = world_encode_wav(wav_file, fs=sample_rate)
-        # print(f'World encode took {time() - t0} seconds')
         f0s.append(f0)
         coded_sps.append(coded_sp)
     log_f0s_mean, log_f0s_std = logf0_statistics(f0s)
@@ -69,14 +66,11 @@ def get_spk_world_feats(spk_fold_path, mc_dir_train, mc_dir_test, sample_rate=16
              coded_sps_mean=coded_sps_mean,
              coded_sps_std=coded_sps_std)
 
-    # for wav_file in tqdm(train_paths):
     for i in range(len(train_paths)):
         wav_file = train_paths[i]
         coded_sp = coded_sps[i]
         wav_nam = basename(wav_file)
         # _, _, _, _, coded_sp = world_encode_wav(wav_file, fs=sample_rate)
-        # import pdb
-        # pdb.set_trace()
         normed_coded_sp = normalize_coded_sp(coded_sp, coded_sps_mean, coded_sps_std)
         np.save(join(mc_dir_train, wav_nam.replace('.wav', '.npy')), normed_coded_sp, allow_pickle=False)
 
@@ -102,9 +96,9 @@ if __name__ == '__main__':
                         help="The original wav path to resample.")
     parser.add_argument("--target_wavpath", type=str, default=target_wavpath_default,
                         help="The original wav path to resample.")
-    parser.add_argument("--mc_dir_train", type=str, default = mc_dir_train_default,
+    parser.add_argument("--mc_dir_train", type=str, default=mc_dir_train_default,
                         help="The directory to store the training features.")
-    parser.add_argument("--mc_dir_test", type=str, default = mc_dir_test_default,
+    parser.add_argument("--mc_dir_test", type=str, default=mc_dir_test_default,
                         help="The directory to store the testing features.")
     parser.add_argument("--num_workers", type=int, default=None, help="The number of cpus to use.")
 
@@ -134,9 +128,6 @@ if __name__ == '__main__':
     executor = ProcessPoolExecutor(max_workers=num_workers)
 
     work_dir = target_wavpath
-    # spk_folders = os.listdir(work_dir)
-    # print("processing {} speaker folders".format(len(spk_folders)))
-    # print(spk_folders)
 
     print('Getting results list...')
     result_list = []
